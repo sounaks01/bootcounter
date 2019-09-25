@@ -2,11 +2,14 @@ package com.ss;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+
+import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +38,21 @@ public class CounterApplication {
 		SpringApplication.run(CounterApplication.class, args);
 	}
 
+	@PostConstruct
+	public void construct() {
+		Resource res = resourceLoader.getResource("file:" + counter_file_location);
+		try {
+			if(!res.getFile().exists()) {
+				File file = new File(res.getURL().getFile());
+				System.out.println("Counter file creation status" + file.createNewFile());
+			}
+		} catch (IOException e) {			
+			e.printStackTrace();
+		} catch (Exception e) {			
+			e.printStackTrace();
+		}
+	}
+	
 	@GetMapping("/counter")
 	public String getCounter() {
 		return "Your login counter in my app is " + storeCounter();
@@ -42,7 +60,9 @@ public class CounterApplication {
 	
 	private Integer storeCounter() {
 		Integer count = 0;
+		
 		Resource res = resourceLoader.getResource("file:" + counter_file_location);
+
 		try {		
 			BufferedReader br = new BufferedReader(new FileReader(res.getFile()));
 			String cnStr = br.readLine();
